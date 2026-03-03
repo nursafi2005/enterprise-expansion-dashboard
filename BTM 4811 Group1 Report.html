@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Enterprise Expansion Intelligence</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: Inter, Arial, sans-serif;
+    background: linear-gradient(135deg,#0f172a,#0b1220);
+    color:white;
+}
+header {
+    padding:25px 50px;
+    font-size:28px;
+    font-weight:600;
+    background:rgba(255,255,255,0.03);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.tabs {
+    display:flex;
+    gap:15px;
+    padding:15px 50px;
+}
+.tab {
+    padding:10px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    background:rgba(255,255,255,0.05);
+    transition:0.3s;
+}
+.tab:hover { background:rgba(37,99,235,0.4); }
+.tab.active { background:#2563eb; }
+.content { padding:40px 50px; }
+.hidden { display:none; }
+
+.panel {
+    background:rgba(255,255,255,0.05);
+    padding:25px;
+    border-radius:12px;
+    margin-bottom:30px;
+    backdrop-filter: blur(12px);
+}
+
+.sidebar {
+    width:250px;
+    float:left;
+}
+.main {
+    margin-left:280px;
+}
+label { display:block; margin-bottom:6px; font-size:14px; }
+select, input[type=checkbox] { margin-bottom:10px; }
+table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+th, td {
+    padding:8px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+input[type=range] { width:100%; }
+.metric-explanation {
+    margin-top:15px;
+    font-size:13px;
+    color:#cbd5e1;
+}
+footer {
+    padding:20px 50px;
+    font-size:12px;
+    color:#94a3b8;
+}
+</style>
+</head>
+
+<body>
+
+<header>Enterprise Expansion Intelligence Platform</header>
+
+<div class="tabs">
+    <div class="tab active" onclick="switchTab(event,'overview')">Overview</div>
+    <div class="tab" onclick="switchTab(event,'comparison')">Metric Comparison</div>
+    <div class="tab" onclick="switchTab(event,'strategy')">Strategy Lab</div>
+</div>
+
+<div class="content">
+
+<div id="overview" class="tabContent">
+    <div class="panel">
+        <h2>Executive Overview</h2>
+        <p>This intelligence platform evaluates metro expansion viability using normalized, weighted indicators across enterprise density, IT demand, economic growth, operating cost structure, and competitive intensity.</p>
+    </div>
+</div>
+
+<div id="comparison" class="tabContent hidden">
+
+<div class="sidebar">
+<h3>Select Cities</h3>
+<label><input type="checkbox" checked value="Dallas"> Dallas</label>
+<label><input type="checkbox" checked value="Atlanta"> Atlanta</label>
+<label><input type="checkbox" checked value="Phoenix"> Phoenix</label>
+<label><input type="checkbox" checked value="Austin"> Austin</label>
+<label><input type="checkbox" checked value="Boston"> Boston</label>
+<label><input type="checkbox" checked value="Charlotte"> Charlotte</label>
+<label><input type="checkbox" checked value="Nashville"> Nashville</label>
+<label><input type="checkbox" checked value="KansasCity"> Kansas City</label>
+<label><input type="checkbox" checked value="Tulsa"> Tulsa</label>
+<label><input type="checkbox" checked value="Cincinnati"> Cincinnati</label>
+
+<h3>Metric</h3>
+<select id="metricSelect">
+<option value="firms">Firms 200+ Employees</option>
+<option value="tech">Tech Job Postings</option>
+<option value="growth">5-Year Growth %</option>
+<option value="office">Office Lease Cost ($/sqft)</option>
+<option value="enterpriseDensity">Enterprise Client Density Index</option>
+<option value="itDemandIndex">IT Demand Index</option>
+<option value="gdpGrowth">Metro GDP Growth %</option>
+<option value="operatingCostIndex">Operating Cost Index (Lower Better)</option>
+<option value="competitionIndex">Competitive Intensity Index (Lower Better)</option>
+</select>
+</div>
+
+<div class="main">
+<div class="panel">
+<canvas id="metricChart"></canvas>
+<div id="metricExplanation" class="metric-explanation"></div>
+</div>
+
+<div class="panel">
+<h3>Metric Values</h3>
+<table id="valueTable"></table>
+</div>
+</div>
+
+</div>
+
+<div id="strategy" class="tabContent hidden">
+
+<div class="panel">
+<h2>Strategy Lab – Weighted Expansion Model</h2>
+
+<label>Enterprise Density Weight</label>
+<input type="range" min="0" max="5" step="0.5" value="2" id="w_firms">
+
+<label>Tech Demand Weight</label>
+<input type="range" min="0" max="5" step="0.5" value="2" id="w_tech">
+
+<label>Growth Weight</label>
+<input type="range" min="0" max="5" step="0.5" value="1" id="w_growth">
+
+<label>Cost Sensitivity (lower better)</label>
+<input type="range" min="0" max="5" step="0.5" value="1" id="w_cost">
+
+<label>Enterprise Client Density Weight</label>
+<input type="range" min="0" max="5" step="0.5" value="2" id="w_enterpriseDensity">
+
+<label>IT Demand Index Weight</label>
+<input type="range" min="0" max="5" step="0.5" value="2" id="w_itDemandIndex">
+
+<label>GDP Growth Weight</label>
+<input type="range" min="0" max="5" step="0.5" value="1" id="w_gdpGrowth">
+
+<label>Competitive Intensity Weight (lower better)</label>
+<input type="range" min="0" max="5" step="0.5" value="1" id="w_competition">
+</div>
+
+<div class="panel">
+<h3>Composite Ranking</h3>
+<table id="rankingTable"></table>
+</div>
+
+</div>
+
+</div>
+
+<footer>
+Sources: U.S. Census, BLS, NAICS 541512, LinkedIn Jobs, CBRE Office Reports
+</footer>
+
+<script>
+
+function switchTab(evt,id){
+document.querySelectorAll('.tabContent').forEach(e=>e.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+evt.currentTarget.classList.add('active');
+}
+
+const data = {
+Dallas:{firms:1842,tech:48200,growth:9.1,office:31,enterpriseDensity:88,itDemandIndex:90,gdpGrowth:4.2,operatingCostIndex:60,competitionIndex:75},
+Atlanta:{firms:1390,tech:42800,growth:7.9,office:30,enterpriseDensity:82,itDemandIndex:85,gdpGrowth:3.8,operatingCostIndex:58,competitionIndex:70},
+Phoenix:{firms:890,tech:28400,growth:11.2,office:27,enterpriseDensity:70,itDemandIndex:72,gdpGrowth:4.5,operatingCostIndex:55,competitionIndex:60},
+Austin:{firms:980,tech:39000,growth:13.9,office:34,enterpriseDensity:85,itDemandIndex:88,gdpGrowth:5.1,operatingCostIndex:65,competitionIndex:85},
+Boston:{firms:1400,tech:52000,growth:4.0,office:42,enterpriseDensity:92,itDemandIndex:95,gdpGrowth:2.8,operatingCostIndex:85,competitionIndex:95},
+Charlotte:{firms:760,tech:21000,growth:10.5,office:29,enterpriseDensity:68,itDemandIndex:65,gdpGrowth:4.0,operatingCostIndex:57,competitionIndex:55},
+Nashville:{firms:620,tech:14500,growth:7.2,office:28,enterpriseDensity:60,itDemandIndex:58,gdpGrowth:3.6,operatingCostIndex:56,competitionIndex:50},
+KansasCity:{firms:700,tech:16000,growth:4.1,office:26,enterpriseDensity:65,itDemandIndex:60,gdpGrowth:3.2,operatingCostIndex:52,competitionIndex:48},
+Tulsa:{firms:310,tech:8200,growth:2.3,office:22,enterpriseDensity:45,itDemandIndex:40,gdpGrowth:2.0,operatingCostIndex:45,competitionIndex:30},
+Cincinnati:{firms:540,tech:12000,growth:1.6,office:25,enterpriseDensity:55,itDemandIndex:50,gdpGrowth:2.5,operatingCostIndex:50,competitionIndex:40}
+};
+
+const metricDescriptions = {
+enterpriseDensity:"Measures concentration of enterprise-scale clients. Higher is stronger.",
+itDemandIndex:"Composite indicator of IT labor demand intensity. Higher means deeper talent demand.",
+gdpGrowth:"Recent metro GDP growth. Higher indicates economic acceleration.",
+operatingCostIndex:"Composite business operating cost index. Lower is favorable.",
+competitionIndex:"Density of competing IT services firms. Lower reduces market saturation."
+};
+
+let chart;
+
+function updateChart(){
+const metric=document.getElementById("metricSelect").value;
+const selected=[...document.querySelectorAll("#comparison input:checked")].map(c=>c.value);
+const values=selected.map(c=>data[c][metric]);
+
+document.getElementById("valueTable").innerHTML="<tr><th>City</th><th>Value</th></tr>";
+selected.forEach((city,i)=>{
+document.getElementById("valueTable").innerHTML+=`<tr><td>${city.replace("KansasCity","Kansas City")}</td><td>${values[i]}</td></tr>`;
+});
+
+document.getElementById("metricExplanation").innerText = metricDescriptions[metric] || "";
+
+if(chart) chart.destroy();
+
+chart=new Chart(document.getElementById("metricChart"),{
+type:"bar",
+data:{labels:selected.map(c=>c.replace("KansasCity","Kansas City")),
+datasets:[{data:values,backgroundColor:"#2563eb"}]},
+options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
+});
+}
+
+document.querySelectorAll("#comparison input,#comparison select").forEach(e=>{
+e.addEventListener("change",updateChart);
+});
+
+updateChart();
+
+function normalize(arr){
+const min=Math.min(...arr);
+const max=Math.max(...arr);
+return arr.map(v=>(v-min)/(max-min));
+}
+
+function updateStrategy(){
+
+const w_firms=parseFloat(document.getElementById("w_firms").value);
+const w_tech=parseFloat(document.getElementById("w_tech").value);
+const w_growth=parseFloat(document.getElementById("w_growth").value);
+const w_cost=parseFloat(document.getElementById("w_cost").value);
+const w_enterpriseDensity=parseFloat(document.getElementById("w_enterpriseDensity").value);
+const w_itDemandIndex=parseFloat(document.getElementById("w_itDemandIndex").value);
+const w_gdpGrowth=parseFloat(document.getElementById("w_gdpGrowth").value);
+const w_competition=parseFloat(document.getElementById("w_competition").value);
+
+const firmsNorm=normalize(Object.values(data).map(d=>d.firms));
+const techNorm=normalize(Object.values(data).map(d=>d.tech));
+const growthNorm=normalize(Object.values(data).map(d=>d.growth));
+const costNorm=normalize(Object.values(data).map(d=>d.office));
+const enterpriseNorm=normalize(Object.values(data).map(d=>d.enterpriseDensity));
+const demandNorm=normalize(Object.values(data).map(d=>d.itDemandIndex));
+const gdpNorm=normalize(Object.values(data).map(d=>d.gdpGrowth));
+const operatingNorm=normalize(Object.values(data).map(d=>d.operatingCostIndex));
+const competitionNorm=normalize(Object.values(data).map(d=>d.competitionIndex));
+
+let ranking=[];
+
+Object.keys(data).forEach((city,i)=>{
+let score =
+firmsNorm[i]*w_firms +
+techNorm[i]*w_tech +
+growthNorm[i]*w_growth +
+(1-costNorm[i])*w_cost +
+enterpriseNorm[i]*w_enterpriseDensity +
+demandNorm[i]*w_itDemandIndex +
+gdpNorm[i]*w_gdpGrowth +
+(1-operatingNorm[i])*w_cost +
+(1-competitionNorm[i])*w_competition;
+
+ranking.push({city,score});
+});
+
+ranking.sort((a,b)=>b.score-a.score);
+
+document.getElementById("rankingTable").innerHTML="<tr><th>Rank</th><th>City</th><th>Score</th></tr>";
+ranking.forEach((r,i)=>{
+document.getElementById("rankingTable").innerHTML+=
+`<tr><td>${i+1}</td><td>${r.city.replace("KansasCity","Kansas City")}</td><td>${r.score.toFixed(3)}</td></tr>`;
+});
+}
+
+document.querySelectorAll("#strategy input").forEach(e=>{
+e.addEventListener("input",updateStrategy);
+});
+
+updateStrategy();
+
+</script>
+</body>
+</html>
